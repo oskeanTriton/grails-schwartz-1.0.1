@@ -127,7 +127,7 @@ class SchwartzJobFactory implements JobFactory, ApplicationContextAware, Schedul
 		Map<Class, Collection<String>> beanNamesByType = [:]
 
 		applicationContext.getBeansOfType(Job).each { String beanName, Job job ->
-			jobsByType[job.getClass()] = job
+			jobsByType.put(job.getClass(), job)
 			Collection<String> names = beanNamesByType[job.getClass()]
 			if (names == null) {
 				beanNamesByType[job.getClass()] = names = []

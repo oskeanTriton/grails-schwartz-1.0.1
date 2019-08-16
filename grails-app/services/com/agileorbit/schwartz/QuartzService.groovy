@@ -18,6 +18,7 @@ import com.agileorbit.schwartz.listener.SessionBinderJobListener
 import com.agileorbit.schwartz.util.Utils
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import grails.util.Holders
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -51,7 +52,7 @@ class QuartzService {
 	@Autowired protected GrailsApplication grailsApplication
 	@Autowired protected Scheduler quartzScheduler
 	@Autowired protected SessionBinderJobListener sessionBinderJobListener
-	@Autowired(required=false) protected SchwartzJob[] jobs
+	protected SchwartzJob[] jobs
 
 	/**
 	 * Called from doWithApplicationContext() to do startup initialization tasks;
@@ -60,6 +61,8 @@ class QuartzService {
 	 * @throws SchedulerException
 	 */
 	void init() throws SchedulerException {
+		jobs = Holders.applicationContext.getBeansOfType(SchwartzJob).values()
+
 		if (!quartzConfig('pluginEnabled', Boolean, true)) {
 			log.info 'Not initializing, quartz.pluginEnabled is false'
 			return
