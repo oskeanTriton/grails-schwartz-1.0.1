@@ -61,7 +61,7 @@ Examples:
 
 			SqlGenerator generator = new SqlGenerator(quartzService, sessionFactory)
 			String filePath = args[0]
-			new File(filePath).text = generator.generate()
+			generator.generate(new File(filePath).toURI().toURL().toString())
 			true
 		}
 		catch (e) {

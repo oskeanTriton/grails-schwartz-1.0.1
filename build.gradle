@@ -42,8 +42,9 @@ dependencies {
 	}
 	compile 'org.quartz-scheduler:quartz-jobs:' + quartzVersion
 	compile 'org.springframework:spring-context-support'
+	compile "org.springframework.batch:spring-batch-admin-manager:1.3.1.RELEASE"
 
-	provided 'org.grails.plugins:hibernate'
+	provided 'org.grails.plugins:hibernate5'
 	provided 'org.liquibase:liquibase-core:3.4.2'
 }
 

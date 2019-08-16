@@ -16,11 +16,13 @@ package com.agileorbit.schwartz.util.jdbc
 
 import com.agileorbit.schwartz.QuartzService
 import groovy.transform.CompileStatic
-import org.grails.orm.hibernate.SessionFactoryProxy
 import org.hibernate.SessionFactory
+import org.hibernate.boot.internal.BootstrapContextImpl
+import org.hibernate.boot.internal.InFlightMetadataCollectorImpl
+import org.hibernate.boot.internal.MetadataBuilderImpl
+import org.hibernate.boot.registry.StandardServiceRegistry
+import org.hibernate.boot.spi.InFlightMetadataCollector
 import org.hibernate.cfg.Configuration
-import org.hibernate.cfg.Mappings
-import org.hibernate.dialect.Dialect
 import org.hibernate.internal.SessionFactoryImpl
 import org.hibernate.mapping.Column
 import org.hibernate.mapping.ForeignKey
@@ -28,6 +30,8 @@ import org.hibernate.mapping.Index
 import org.hibernate.mapping.PrimaryKey
 import org.hibernate.mapping.SimpleValue
 import org.hibernate.mapping.Table
+import org.hibernate.tool.hbm2ddl.SchemaExport
+import org.hibernate.tool.schema.TargetType
 import org.springframework.core.InfrastructureProxy
 
 /**
@@ -53,17 +57,16 @@ class SqlGenerator extends AbstractGenerator {
 	 *
 	 * @return the SQL
 	 */
-	String generate() {
+	void generate(String fileUrl) {
+		Configuration configuration = new Configuration().configure()
+		StandardServiceRegistry registry = configuration.standardServiceRegistryBuilder.build()
 
-		Dialect dialect = findSessionFactoryImpl(sessionFactory).dialect
-
-		Configuration configuration = new Configuration() {
-			protected void secondPassCompileForeignKeys(Table table, Set<ForeignKey> done) {
-				// not needed and fails because of incomplete configuration
-			}
-		}
-
-		Mappings mappings = configuration.createMappings()
+		def options = new MetadataBuilderImpl.MetadataBuildingOptionsImpl(registry)
+		def bootStrapContext = new BootstrapContextImpl(registry, options)
+		InFlightMetadataCollectorImpl mappings = new InFlightMetadataCollectorImpl(
+			bootStrapContext,
+			options
+		)
 
 		String prefix = tableNamePrefix()
 
@@ -72,7 +75,7 @@ class SqlGenerator extends AbstractGenerator {
 		for (tableData in data) {
 			Table table = mappings.addTable(null, null, prefix + tableData.name, null, false)
 			tables[table.name] = table
-			table.primaryKey = new PrimaryKey(table: table)
+			table.primaryKey = new PrimaryKey(table)
 			for (ColumnData col in tableData.pk) {
 				addVarchar table, col.name, col.length, false, mappings
 			}
@@ -93,7 +96,7 @@ class SqlGenerator extends AbstractGenerator {
 
 			if (tableData.fk) {
 				Table otherTable = tables[prefix + tableData.fk]
-				ForeignKey fk = table.createForeignKey(null, otherTable.primaryKey.columnIterator.findAll() as List, null)
+				ForeignKey fk = table.createForeignKey(null, otherTable.primaryKey.columnIterator.findAll() as List, null, null)
 				fk.referencedTable = otherTable
 				fk.alignColumns()
 			}
@@ -108,7 +111,9 @@ class SqlGenerator extends AbstractGenerator {
 			}
 		}
 
-		configuration.generateSchemaCreationScript(dialect).join('\n\n')
+		SchemaExport export = new SchemaExport()
+		export.setOutputFile(fileUrl)
+		export.create( EnumSet.of( TargetType.SCRIPT ), mappings)
 	}
 
 	protected SessionFactoryImpl findSessionFactoryImpl(sessionFactory) {
@@ -116,27 +121,23 @@ class SqlGenerator extends AbstractGenerator {
 			return findSessionFactoryImpl(((InfrastructureProxy) sessionFactory).wrappedObject)
 		}
 
-		if (sessionFactory instanceof SessionFactoryProxy) {
-			return findSessionFactoryImpl(((SessionFactoryProxy) sessionFactory).currentSessionFactory)
-		}
-
 		(SessionFactoryImpl) sessionFactory
 	}
 
-	protected Column addVarchar(Table table, String name, int length, boolean nullable, Mappings mappings) {
+	protected Column addVarchar(Table table, String name, int length, boolean nullable, InFlightMetadataCollector mappings) {
 		Column column = addSimple(table, Type.STRING, name, nullable, mappings)
 		column.length = length
 		column
 	}
 
-	protected Column addDecimal(Table table, String name, int precision, int scale, boolean nullable, Mappings mappings) {
+	protected Column addDecimal(Table table, String name, int precision, int scale, boolean nullable, InFlightMetadataCollector mappings) {
 		Column column = addSimple(table, Type.DECIMAL, name, nullable, mappings)
 		column.precision = precision
 		column.scale = scale
 		column
 	}
 
-	protected Column addSimple(Table table, Type type, String name, boolean nullable, Mappings mappings) {
+	protected Column addSimple(Table table, Type type, String name, boolean nullable, InFlightMetadataCollector mappings) {
 		SimpleValue value = new SimpleValue(mappings, table)
 		switch (type) {
 			case Type.STRING:
