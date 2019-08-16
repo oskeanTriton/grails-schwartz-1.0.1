@@ -19,6 +19,8 @@ import groovy.transform.CompileStatic
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.text.SimpleDateFormat
+
 /**
  * @author <a href='mailto:burt@agileorbit.com'>Burt Beckwith</a>
  */
@@ -30,6 +32,6 @@ abstract class AbstractListener {
 	String getName() { getClass().simpleName }
 
 	protected String now() {
-		new Date().format Utils.DATE_FORMAT
+		new SimpleDateFormat(Utils.DATE_FORMAT).format(new Date())
 	}
 }

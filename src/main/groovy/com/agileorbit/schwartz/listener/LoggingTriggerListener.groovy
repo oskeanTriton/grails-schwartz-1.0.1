@@ -21,6 +21,8 @@ import org.quartz.Trigger
 import org.quartz.Trigger.CompletedExecutionInstruction
 import org.quartz.TriggerListener
 
+import java.text.SimpleDateFormat
+
 /**
  * Logs information about triggers when they start and finish, and if they misfire.
  *
@@ -39,7 +41,7 @@ class LoggingTriggerListener extends AbstractListener implements TriggerListener
 		if (!log.infoEnabled) return
 
 		log.info 'Trigger {} misfired job {} at {}, should have fired at {}',
-				trigger.key, trigger.jobKey, now(), trigger.nextFireTime.format(Utils.DATE_FORMAT)
+				trigger.key, trigger.jobKey, now(), new SimpleDateFormat(Utils.DATE_FORMAT).format(trigger.nextFireTime)
 	}
 
 	void triggerComplete(Trigger trigger, JobExecutionContext context, CompletedExecutionInstruction cei) {

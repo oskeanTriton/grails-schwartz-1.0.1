@@ -27,6 +27,7 @@ import org.quartz.Trigger.TriggerState
 import org.quartz.spi.JobStore
 import org.springframework.core.Constants
 
+import java.text.SimpleDateFormat
 /**
  * Utility methods.
  *
@@ -126,7 +127,7 @@ class Utils {
 
 		for (name in ([] + props.keySet())) {
 			if (props[name] instanceof Date) {
-				props[name] = ((Date)props[name]).format(DATE_FORMAT)
+				props[name] = new SimpleDateFormat(DATE_FORMAT).format((Date)props[name])
 			}
 		}
 

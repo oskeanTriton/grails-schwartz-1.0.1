@@ -38,6 +38,7 @@ import org.quartz.spi.SchedulerPlugin
 import org.springframework.util.ReflectionUtils
 
 import java.lang.reflect.Field
+import java.text.SimpleDateFormat
 
 import static org.quartz.impl.matchers.GroupMatcher.anyGroup
 
@@ -247,7 +248,7 @@ class SchedulerSnapshot {
 
 							for (Map.Entry entry in data.entrySet()) {
 								if (entry.value instanceof Date) {
-									entry.value = ((Date)entry.value).format(Utils.DATE_FORMAT)
+									entry.value = new SimpleDateFormat(Utils.DATE_FORMAT).format((Date)entry.value)
 								}
 							}
 
