@@ -20,7 +20,7 @@
 import com.agileorbit.schwartz.SchwartzJob
 import com.agileorbit.schwartz.StatefulSchwartzJob
 import grails.codegen.model.Model
-import grails.transaction.Transactional
+import grails.gorm.transactions.Transactional
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.quartz.JobExecutionContext

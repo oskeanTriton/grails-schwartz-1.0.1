@@ -17,7 +17,7 @@ package com.agileorbit.schwartz
 import com.agileorbit.schwartz.listener.SessionBinderJobListener
 import com.agileorbit.schwartz.util.Utils
 import grails.core.GrailsApplication
-import grails.transaction.Transactional
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
